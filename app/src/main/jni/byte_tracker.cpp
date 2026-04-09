@@ -8,9 +8,6 @@
 #include <cmath>
 #include <limits>
 
-#define LOG_TAG "ByteTracker"
-#define LOGI(...) __android_log_print(ANDROID_LOG_INFO, LOG_TAG, __VA_ARGS__)
-
 // ============== STrack Implementation ==============
 
 STrack::STrack(const cv::Rect_<float>& bbox, float score, int classId)
@@ -235,7 +232,6 @@ void ByteTracker::reset() {
     m_removedTracks.clear();
     m_frameId = 0;
     m_trackIdCount = 0;
-    LOGI("ByteTracker reset");
 }
 
 std::vector<std::pair<int, int>> ByteTracker::linearAssignment(

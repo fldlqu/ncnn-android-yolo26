@@ -28,8 +28,6 @@ import androidx.core.content.ContextCompat;
 
 import com.google.common.util.concurrent.ListenableFuture;
 
-import java.io.ByteArrayOutputStream;
-import java.nio.ByteBuffer;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -59,6 +57,8 @@ public class MainActivity extends AppCompatActivity {
 
     private long lastDetectTime = 0;
     private static final long DETECT_INTERVAL = 20; // 检测间隔 100ms
+
+    private static final boolean withLog = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -154,6 +154,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void reloadModel() {
         boolean ret = yolo26Ncnn.loadModel(getAssets(), currentModel, currentDevice);
+        yolo26Ncnn.setLogEnabled(withLog);
         if (!ret) {
             Log.e(TAG, "Failed to load model");
             Toast.makeText(this, "Failed to load model", Toast.LENGTH_SHORT).show();
@@ -232,7 +233,9 @@ public class MainActivity extends AppCompatActivity {
             long cur = System.currentTimeMillis();
             // 将 ImageProxy 转换为 Bitmap
             Bitmap bitmap = imageProxyToBitmap(image);
-            Log.i(TAG, "analyzeImage: imagetype： "+image.getFormat()+"  "+image.getWidth()+"  "+image.getImageInfo().getRotationDegrees()+"  "+(System.currentTimeMillis()-cur));
+            if (withLog){
+                Log.i(TAG, "analyzeImage: imagetype： "+image.getFormat()+"  "+image.getWidth()+"  "+image.getImageInfo().getRotationDegrees()+"  "+(System.currentTimeMillis()-cur));
+            }
 
             if (bitmap == null) {
                 image.close();
@@ -244,7 +247,9 @@ public class MainActivity extends AppCompatActivity {
             Yolo26Ncnn.Obj[] objects = yolo26Ncnn.detect(bitmap,image.getImageInfo().getRotationDegrees(),isFrontCamera);
             long inferenceTime = System.currentTimeMillis() - startTime;
 
-            Log.i(TAG, "analyzeImage: yoloDetect： " + inferenceTime);
+            if (withLog) {
+                Log.i(TAG, "analyzeImage: yoloDetect： " + inferenceTime);
+            }
 
             // Update UI
             final int objectCount = objects != null ? objects.length : 0;
@@ -302,7 +307,9 @@ public class MainActivity extends AppCompatActivity {
 
             long cur = System.currentTimeMillis();
             Bitmap bitmap = image.toBitmap();
-            Log.i(TAG, "analyzeImage imageProxyToBitmap: "+(System.currentTimeMillis()-cur));
+            if (withLog) {
+                Log.i(TAG, "analyzeImage imageProxyToBitmap: " + (System.currentTimeMillis() - cur));
+            }
             return bitmap;
 
         } catch (Exception e) {

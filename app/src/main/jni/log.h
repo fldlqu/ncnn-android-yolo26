@@ -1,17 +1,34 @@
-//
-// Created by xianwei.yan on 2026/4/9.
-//
-
-#ifndef NCNN_ANDROID_YOLO26_LOG_H
-#define NCNN_ANDROID_YOLO26_LOG_H
-
+#ifndef YOLO26NCNN_LOG_H
+#define YOLO26NCNN_LOG_H
 
 #include <android/log.h>
 
-#define TAG "YOLO26"
-#define LOGD(...) __android_log_print(ANDROID_LOG_DEBUG, TAG, __VA_ARGS__)
-#define LOGI(...) __android_log_print(ANDROID_LOG_INFO, TAG, __VA_ARGS__)
-#define LOGW(...) __android_log_print(ANDROID_LOG_WARN, TAG, __VA_ARGS__)
+#define TAG "Yolo26Ncnn"
 
+// 全局日志开关，可通过函数动态设置
+extern int g_log_enabled;
 
-#endif //NCNN_ANDROID_YOLO26_LOG_H
+// 动态日志宏定义
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+void set_log_enabled(int enabled);
+
+#ifdef __cplusplus
+}
+#endif
+
+#if defined(__cplusplus)
+#define LOGD(...) if(g_log_enabled) __android_log_print(ANDROID_LOG_DEBUG, TAG, __VA_ARGS__)
+#define LOGE(...) if(g_log_enabled) __android_log_print(ANDROID_LOG_ERROR, TAG, __VA_ARGS__)
+#define LOGI(...) if(g_log_enabled) __android_log_print(ANDROID_LOG_INFO, TAG, __VA_ARGS__)
+#define LOGW(...) if(g_log_enabled) __android_log_print(ANDROID_LOG_WARN, TAG, __VA_ARGS__)
+#else
+#define LOGD(...) if(g_log_enabled) __android_log_print(ANDROID_LOG_DEBUG, TAG, __VA_ARGS__)
+#define LOGE(...) if(g_log_enabled) __android_log_print(ANDROID_LOG_ERROR, TAG, __VA_ARGS__)
+#define LOGI(...) if(g_log_enabled) __android_log_print(ANDROID_LOG_INFO, TAG, __VA_ARGS__)
+#define LOGW(...) if(g_log_enabled) __android_log_print(ANDROID_LOG_WARN, TAG, __VA_ARGS__)
+#endif
+
+#endif //YOLO26NCNN_LOG_H

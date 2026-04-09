@@ -15,6 +15,8 @@ public class Yolo26Ncnn {
     }
 
     public native boolean loadModel(AssetManager mgr, int modelid, int useGpu);
+    public native void setLogEnabled(boolean enabled);
+
     public native Obj[] detect(Bitmap bitmap, int rotation, boolean isFrontCamera);
 
     static {

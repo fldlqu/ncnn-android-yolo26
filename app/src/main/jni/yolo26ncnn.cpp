@@ -24,6 +24,9 @@ static Yolo* g_yolo = 0;
 static ByteTracker* g_byteTracker = 0;
 static ncnn::Mutex lock;
 
+// 定义全局日志开关变量，默认启用
+int g_log_enabled = 1;
+
 static jclass objCls = nullptr;
 static jmethodID objInit = nullptr;
 static jfieldID xId = nullptr;
@@ -38,6 +41,11 @@ static jfieldID trackIdId = nullptr;
 static const int YOLO26_TARGET_SIZE = 320;
 static const float YOLO26_MEAN_VALS[3] = {0.f, 0.f, 0.f};
 static const float YOLO26_NORM_VALS[3] = {1 / 255.f, 1 / 255.f, 1 / 255.f};
+
+// 设置日志开关状态
+void set_log_enabled(int enabled) {
+    g_log_enabled = enabled;
+}
 
 extern "C" {
 
@@ -216,6 +224,11 @@ Java_com_example_yolo26ncnn_Yolo26Ncnn_detect(JNIEnv *env, jobject thiz, jobject
     LOGD( "Yolo26Ncnn %.2fms total detect (with rotate)", elasped);
 
     return jObjArray;
+}
+
+JNIEXPORT void JNICALL
+Java_com_example_yolo26ncnn_Yolo26Ncnn_setLogEnabled(JNIEnv *env, jobject thiz, jboolean enabled) {
+    set_log_enabled(enabled ? 1 : 0);
 }
 
 }
