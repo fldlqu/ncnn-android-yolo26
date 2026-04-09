@@ -3,11 +3,6 @@ package com.example.yolo26ncnn;
 import android.Manifest;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.ImageFormat;
-import android.graphics.Matrix;
-import android.graphics.Rect;
-import android.graphics.YuvImage;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.Size;
@@ -20,7 +15,6 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.camera.core.Camera;
 import androidx.camera.core.CameraSelector;
 import androidx.camera.core.ImageAnalysis;
 import androidx.camera.core.ImageProxy;
@@ -64,7 +58,7 @@ public class MainActivity extends AppCompatActivity {
     private ProcessCameraProvider cameraProvider;
 
     private long lastDetectTime = 0;
-    private static final long DETECT_INTERVAL = 0; // 检测间隔 100ms
+    private static final long DETECT_INTERVAL = 20; // 检测间隔 100ms
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

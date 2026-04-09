@@ -1,14 +1,8 @@
 #ifndef YOLO_H
 #define YOLO_H
 
-#include <opencv2/core/core.hpp>
 #include <net.h>
-
-struct Object {
-    cv::Rect_<float> rect;
-    int label;
-    float prob;
-};
+#include "detector.h"
 
 class Yolo {
 public:
@@ -20,7 +14,7 @@ public:
 
     // default prob_threshold raised to cut noisy low-confidence boxes
 //    int detect(const cv::Mat& rgb, std::vector<Object>& objects, float prob_threshold = 0.50f, float nms_threshold = 0.45f);
-    int detect(const ncnn::Mat& input, std::vector<Object>& objects, float prob_threshold = 0.50f, float nms_threshold = 0.45f);
+    int detect(const ncnn::Mat& input, std::vector<Object>& objects,const float norm_vals_ultra[], float prob_threshold = 0.50f, float nms_threshold = 0.45f);
 
 private:
     ncnn::Net yolo;

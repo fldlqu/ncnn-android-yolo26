@@ -9,6 +9,7 @@ import android.view.View;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class OverlayView extends View {
 
@@ -73,7 +74,8 @@ public class OverlayView extends View {
                 results.add(new DetectionResult(
                         obj.x, obj.y, obj.w, obj.h,
                         obj.label != null ? obj.label : "unknown",
-                        obj.prob
+                        obj.prob,
+                        obj.trackId
                 ));
             }
         }
@@ -135,7 +137,7 @@ public class OverlayView extends View {
             canvas.drawRect(left, top, right, bottom, boxPaint);
 
             // Draw label
-            String label = String.format("%s %.0f%%", result.label, result.prob * 100);
+            String label = String.format(Locale.getDefault(),"trackId: %d  %s %.0f%%",result.trackId, result.label, result.prob * 100);
             float textWidth = textPaint.measureText(label);
             float textHeight = 40;
             float padding = 8;
@@ -159,14 +161,16 @@ public class OverlayView extends View {
         float x, y, w, h;
         String label;
         float prob;
+        int trackId;
 
-        DetectionResult(float x, float y, float w, float h, String label, float prob) {
+        DetectionResult(float x, float y, float w, float h, String label, float prob, int trackId) {
             this.x = x;
             this.y = y;
             this.w = w;
             this.h = h;
             this.label = label;
             this.prob = prob;
+            this.trackId = trackId;
         }
     }
 }

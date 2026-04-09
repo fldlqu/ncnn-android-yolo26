@@ -13,6 +13,8 @@ find_package(OpenCV REQUIRED core imgproc)
 
 # 添加共享库
 add_library(yolo26ncnn SHARED
+    byte_tracker.cpp
+    kalman_filter.cpp
     yolo26ncnn.cpp
     yolo.cpp
 )

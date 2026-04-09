@@ -11,14 +11,12 @@
 #include <cpu.h>
 #include <layer.h>
 
-#include <android/log.h>
+#include "log.h"
 #include <cfloat>
 #include <vector>
 #include <algorithm>
 #include <cmath>
 
-#define TAG "YOLO26"
-#define LOGD(...) __android_log_print(ANDROID_LOG_DEBUG, TAG, __VA_ARGS__)
 
 // 优化 1: 将矩形面积预计算，避免 NMS 中重复计算
 struct ObjectOpt : Object {
@@ -91,54 +89,6 @@ static void nms_sorted_bboxes(const std::vector<ObjectOpt>& objects, std::vector
     }
 }
 
-// 优化 2: 极大优化内存访问模式
-static void generate_proposals_yolo26(const ncnn::Mat& pred, float prob_threshold, std::vector<ObjectOpt>& objects) {
-    objects.clear();
-    const int num_proposals = pred.w;        // 8400
-    const int num_feat      = pred.h;        // 84
-    const int num_class     = num_feat - 4;  // 80
-
-    // 预取所有行的指针，避免在循环内调用 pred.row()
-    const float* row_ptrs[84];
-    for (int i = 0; i < 84; i++) {
-        row_ptrs[i] = pred.row(i);
-    }
-
-    // 预分配空间，减少 vector 扩容开销
-    objects.reserve(256);
-
-    for (int i = 0; i < num_proposals; i++) {
-        int label = -1;
-        float score = -1.f;
-
-        // 寻找最大置信度类别
-        for (int k = 0; k < num_class; k++) {
-            float s = row_ptrs[4 + k][i];
-            if (s > score) {
-                score = s;
-                label = k;
-            }
-        }
-
-        if (score < prob_threshold) continue;
-
-        ObjectOpt obj;
-        // 直接读取坐标
-        float cx = row_ptrs[0][i];
-        float cy = row_ptrs[1][i];
-        float bw = row_ptrs[2][i];
-        float bh = row_ptrs[3][i];
-
-        obj.rect.x = cx - bw * 0.5f;
-        obj.rect.y = cy - bh * 0.5f;
-        obj.rect.width  = bw;
-        obj.rect.height = bh;
-        obj.label = label;
-        obj.prob  = score;
-        obj.area  = bw * bh; // 预计算面积
-        objects.push_back(obj);
-    }
-}
 
 Yolo::Yolo()
 {
@@ -241,7 +191,7 @@ inline float sigmoid(float x) {
     return 1.0f / (1.0f + expf(-x));
 }
 
-int Yolo::detect(const ncnn::Mat& input, std::vector<Object>& objects, float prob_threshold, float nms_threshold)
+int Yolo::detect(const ncnn::Mat& input, std::vector<Object>& objects,const float norm_vals_ultra[], float prob_threshold, float nms_threshold)
 {
     objects.clear();
 
@@ -249,7 +199,7 @@ int Yolo::detect(const ncnn::Mat& input, std::vector<Object>& objects, float pro
     const int img_h = input.h;
 
 
-    __android_log_print(ANDROID_LOG_DEBUG, "Yolo26Ncnn","Resizing and img_w: %dx  img_h: %dx", img_w, img_h);
+    LOGD("Resizing and img_w: %dx  img_h: %dx", img_w, img_h);
 
     // Your model is fixed 640x640 (8400 points), so target_size MUST be 640
     const int dst_size = target_size; // set to 640 in Java/C++ init
@@ -263,7 +213,7 @@ int Yolo::detect(const ncnn::Mat& input, std::vector<Object>& objects, float pro
          new_w = (int)(img_w * scale);
          new_h = (int)(img_h * scale);
 
-        __android_log_print(ANDROID_LOG_DEBUG, "Yolo26Ncnn","Resizing and padding to %dx%d", new_w, new_h);
+        LOGD("Resizing and padding to %dx%d", new_w, new_h);
 
         // 使用 ncnn 内置的高效缩放并直接归一化
         ncnn::Mat in_resized;
@@ -278,7 +228,6 @@ int Yolo::detect(const ncnn::Mat& input, std::vector<Object>& objects, float pro
     }
 
     // 归一化
-    const float norm_vals_ultra[3] = {1 / 255.f, 1 / 255.f, 1 / 255.f};
     in_pad.substract_mean_normalize(0, norm_vals_ultra);
     // 执行推理
     ncnn::Extractor ex = yolo.create_extractor();
